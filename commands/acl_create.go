@@ -8,6 +8,7 @@ import (
 )
 
 type AclCreateOptions struct {
+	ID           string
 	IsManagement bool
 	Name         string
 	ConfigRules  []*ConfigRule
@@ -37,6 +38,7 @@ func (a *Acl) AddCreateSub(c *cobra.Command) {
 	}
 
 	createCmd.Flags().BoolVar(&aco.IsManagement, "management", false, "Create a management token")
+	createCmd.Flags().StringVar(&aco.ID, "id", "", "ID of the ACL")
 	createCmd.Flags().StringVar(&aco.Name, "name", "", "Name of the ACL")
 	createCmd.Flags().Var((funcVar)(func(s string) error {
 		t, err := a.ParseRuleConfig(s)
@@ -54,6 +56,7 @@ func (a *Acl) AddCreateSub(c *cobra.Command) {
 
 	oldCreateCmd.Flags().BoolVar(&aco.IsManagement, "management", false, "Create a management token")
 	oldCreateCmd.Flags().StringVar(&aco.Name, "name", "", "Name of the ACL")
+	oldCreateCmd.Flags().StringVar(&aco.ID, "id", "", "ID of the ACL")
 	oldCreateCmd.Flags().Var((funcVar)(func(s string) error {
 		t, err := a.ParseRuleConfig(s)
 		if err != nil {
@@ -83,6 +86,7 @@ func (a *Acl) Create(args []string, aco *AclCreateOptions) error {
 
 	if aco.IsManagement {
 		entry = &consulapi.ACLEntry{
+			ID:   aco.ID,
 			Name: aco.Name,
 			Type: consulapi.ACLManagementType,
 		}
@@ -93,6 +97,7 @@ func (a *Acl) Create(args []string, aco *AclCreateOptions) error {
 		}
 
 		entry = &consulapi.ACLEntry{
+			ID:    aco.ID,
 			Name:  aco.Name,
 			Type:  consulapi.ACLClientType,
 			Rules: rules,
